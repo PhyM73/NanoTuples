@@ -42,6 +42,9 @@ _pfMassDecorrelatedInclParticleTransformerV2JetTagsProbs = ['pfMassDecorrelatedI
 
 _pfMassDecorrelatedInclParticleTransformerV2JetTagsProbsSelected = ['pfMassDecorrelatedInclParticleTransformerV2JetTags:' + flav_name
                                  for flav_name in ['probHbb', 'probHcc', 'probHss', 'probHqq', 'probHbc', 'probHbs', 'probHcs', 'probHgg', 'probHee', 'probHmm', 'probHtauhtaue', 'probHtauhtaum', 'probHtauhtauh', 
+                                                    'probHWWcscs', 'probHWWcsqq', 'probHWWqqqq', 'probHWWcsc', 'probHWWcss', 'probHWWcsq', 'probHWWqqc', 'probHWWqqs', 'probHWWqqq', 
+            'probHWxWxcscs', 'probHWxWxcsqq', 'probHWxWxqqqq', 'probHWxWxcsc', 'probHWxWxcss', 'probHWxWxcsq', 'probHWxWxqqc', 'probHWxWxqqs', 'probHWxWxqqq', 
+            'probHWxWxStarcscs', 'probHWxWxStarcsqq', 'probHWxWxStarqqqq', 'probHWxWxStarcsc', 'probHWxWxStarcss', 'probHWxWxStarcsq', 'probHWxWxStarqqc', 'probHWxWxStarqqs', 'probHWxWxStarqqq', 
                                                    'probQCDbb', 'probQCDcc', 'probQCDb', 'probQCDc', 'probQCDothers', 
                                                    'resonanceMassCorr', 'visiableMassCorr']]
 # meta-taggers
