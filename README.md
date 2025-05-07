@@ -23,8 +23,7 @@ The current version is based on [NanoAODv9](https://gitlab.cern.ch/cms-nanoAOD/n
 
 Customizations:
 
-- AK15 jets w/ ParticleNet-MD (V02d, EOY training)
-- [*not enabled by default*] PFCands of AK15 jets
+- AK8 jets with GloParTv2 
 
 ------
 
@@ -41,7 +40,7 @@ cmsenv
 ### Get customized NanoAOD producers
 
 ```bash
-git clone https://github.com/colizz/NanoTuples.git PhysicsTools/NanoTuples -b dev-part-UL
+git clone https://github.com/PhyM73/NanoTuples.git PhysicsTools/NanoTuples -b dev-part-UL
 ```
 
 ### Use an updated onnxruntime package (before compiling the code)
@@ -50,16 +49,10 @@ git clone https://github.com/colizz/NanoTuples.git PhysicsTools/NanoTuples -b de
 ./PhysicsTools/NanoTuples/scripts/install_onnxruntime.sh
 ```
 
-### Get the ParT model
-
-```bash
-wget https://coli.web.cern.ch/coli/tmp/.240120-181907_ak8_stage2/model.onnx -O $CMSSW_BASE/src/PhysicsTools/NanoTuples/data/InclParticleTransformer-MD/ak8/V02/model.onnx
-```
-
 ### Compile
 
 ```bash
-scram b -j16
+scram b -j15
 ```
 
 ### Test
@@ -110,6 +103,67 @@ Data (UL18, MiniAODv2):
 
 ```bash
 cmsDriver.py --python_filename test_nanoTuples_data2018.py --eventcontent NANOAOD --customise PhysicsTools/NanoTuples/nanoTuples_cff.nanoTuples_customizeData --datatier NANOAOD --fileout file:nano_data2018.root --conditions 106X_dataRun2_v37 --step NANO --filein /store/data/Run2018A/SingleMuon/MINIAOD/UL2018_MiniAODv2_GT36-v1/2820000/000EE25A-A8E8-1444-8A0B-0DBEBE5634FB.root --era Run2_2018,run2_nanoAOD_106Xv2 --data -n 50
+```
+
+## Production
+
+### Step 0: switch to the crab production directory and set up grid proxy, CRAB environment, etc.
+
+```bash
+cd $CMSSW_BASE/src/PhysicsTools/NanoTuples/crab
+# set up grid proxy
+voms-proxy-init -rfc -voms cms --valid 168:00
+# set up CRAB env (must be done after cmsenv)
+source /cvmfs/cms.cern.ch/common/crab-setup.sh
+```
+
+### Step 1: generate the python config file with cmsDriver.py:
+
+MC (2018, 102X):
+```bash
+cmsDriver.py mc2018 -n -1 --mc --eventcontent NANOAODSIM --datatier NANOAODSIM --conditions 106X_upgrade2018_realistic_v16_L1v1 --step NANO --nThreads 1 --era Run2_2018,run2_nanoAOD_106Xv2 --customise PhysicsTools/NanoTuples/nanoTuples_cff.nanoTuples_customizeMC --filein file:step-1.root --fileout file:nano.root --no_exec
+```
+
+### Step 2: use the crab.py script to submit the CRAB jobs
+
+For MC:
+```bash
+python crab.py -p mc_NANO.py --site T2_CH_CERN -o /store/user/$USER/outputdir -t NanoTuples-GloParT -i mc.txt --num-cores 1 --send-external -s FileBased -n 2 --work-area crab_projects_mc --dryrun
+```
+
+These command will perform a "dryrun" to print out the CRAB configuration files. Please check everything is correct (e.g., the output path, version number, requested number of cores, etc.) before submitting the actual jobs. To actually submit the jobs to CRAB, just remove the --dryrun option at the end.
+
+### Step 3: check job status
+
+The status of the CRAB jobs can be checked with:
+
+```bash
+./crab.py --status --work-area crab_projects_*  --options "maxjobruntime=2500 maxmemory=2500" && ./crab.py --summary
+```
+
+Note that this will also resubmit failed jobs automatically.
+
+The crab dashboard can also be used to get a quick overview of the job status:
+
+https://monit-grafana.cern.ch/d/cmsTMGlobal/cms-tasks-monitoring-globalview?orgId=11
+
+------
+
+# Edit CMSSW_10_6_X to include PFCand in NanoAODv9 
+```bash
+cmsrel CMSSW_10_6_31
+cd CMSSW_10_6_31/src
+cmsenv
+
+git cms-addpkg PhysicsTools/NanoAOD
+git cms-addpkg PhysicsTools/PatAlgos
+git cms-addpkg DataFormats/NanoAOD
+
+# edit the `PhysicsTools/NanoAOD/python/jets_cff.py` according to 
+# 1. https://github.com/cms-sw/cmssw/pull/46012
+# 2. https://github.com/cms-sw/cmssw/pull/47206
+
+# It is pushed to https://github.com/PhyM73/cmssw/pull/1 now and can be directly downloaded with `git cms-checkout-topic`
 ```
 
 <!--
